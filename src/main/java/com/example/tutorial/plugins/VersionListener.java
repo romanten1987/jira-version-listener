@@ -7,7 +7,6 @@ import com.atlassian.event.api.EventPublisher;
 import com.atlassian.jira.component.ComponentAccessor;
 import com.atlassian.jira.config.ConstantsManager;
 import com.atlassian.jira.config.properties.ApplicationProperties;
-import com.atlassian.jira.event.project.VersionCreateEvent;
 import com.atlassian.jira.event.project.VersionReleaseEvent;
 import com.atlassian.jira.issue.CustomFieldManager;
 import com.atlassian.jira.issue.search.SearchProvider;
@@ -19,7 +18,6 @@ import com.atlassian.jira.project.version.VersionManager;
 import com.atlassian.jira.security.groups.GroupManager;
 import com.atlassian.jira.template.VelocityTemplatingEngine;
 import com.atlassian.jira.user.util.UserManager;
-import com.atlassian.jira.web.action.browser.ReleaseNote;
 import com.atlassian.mail.queue.MailQueueItem;
 import com.atlassian.mail.queue.SingleMailQueueItem;
 
@@ -32,7 +30,6 @@ import java.util.Collection;
 
 import com.atlassian.jira.project.util.ReleaseNoteManager;
 import webwork.action.Action;
-import webwork.action.ActionSupport;
 import webwork.action.factory.ActionFactory;
 
 import javax.mail.internet.AddressException;
@@ -79,9 +76,37 @@ public class VersionListener implements InitializingBean, DisposableBean {
         long versionId = versionReleaseEvent.getVersionId();
         Version version = versionManager.getVersion(versionId);
         Project project = version.getProjectObject();
-        User user = project.getProjectLead().getDirectoryUser();
-        String releaseNote = getReleaseNote(project, version, user);
-        processMail(releaseNote, user);
+        User leadUser = project.getProjectLead().getDirectoryUser();
+        String releaseNote = getReleaseNote(project, version, leadUser);
+        String versionName = version.getName();
+        String projectName = project.getName();
+        String emailAddresses = getRecipientAddresses();
+        sendMail(emailAddresses, releaseNote);
+
+    }
+
+    private String getRecipientAddresses() {
+        UserManager userManager = ComponentAccessor.getUserManager();
+        GroupManager groupManager = ComponentAccessor.getGroupManager();
+        String result = null;
+        if (groupManager.groupExists("releaseNote-users")) {
+            StringBuilder emailList = new StringBuilder();
+            Group group = userManager.getGroup("releaseNote-users");
+            Collection<User> users = groupManager.getUsersInGroup(group);
+            for (User user : users) {
+                String email = user.getEmailAddress();
+                if (isValidEmailAddress(email)) {
+                    emailList.append(email).append(",");
+                }
+            }
+            result = emailList.toString();
+        } else {
+            String email = projectLead.getEmailAddress();
+            String errorText = "Group \"releaseNote-users\" not found. Please create this group";
+            sendMail(email,errorText);
+        }
+
+        return result;
 
     }
 
@@ -103,28 +128,7 @@ public class VersionListener implements InitializingBean, DisposableBean {
         return releaseNoteManager.getReleaseNote(action, style, version, user, project.getGenericValue());
     }
 
-    private void processMail(String body, User projectLead) {
-        UserManager userManager = ComponentAccessor.getUserManager();
-        GroupManager groupManager = ComponentAccessor.getGroupManager();
 
-        if (groupManager.groupExists("releaseNote-users")) {
-            StringBuilder emailList = new StringBuilder();
-            Group group = userManager.getGroup("releaseNote-users");
-            Collection<User> users = groupManager.getUsersInGroup(group);
-            for (User user : users) {
-                String email = user.getEmailAddress();
-                if (isValidEmailAddress(email)) {
-                    emailList.append(email).append(",");
-                }
-            }
-            sendMail(emailList.toString(), body);
-        } else {
-            String email = projectLead.getEmailAddress();
-            String errorText = "Group \"releaseNote-users\" not found. Please create this group";
-            sendMail(email,errorText);
-            return;
-        }
-    }
 
     private void sendMail(String emailList, String body) {
         Email email = new Email(emailList);
