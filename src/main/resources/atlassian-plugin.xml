@@ -31,6 +31,11 @@
 
     <component-import key="eventPublisher" interface="com.atlassian.event.api.EventPublisher"/>
     <component-import key="versionManager" interface="com.atlassian.jira.project.version.VersionManager" />
+    <component-import key="projectManager" interface="com.atlassian.jira.project.ProjectManager" />
+    <component-import key="engine" interface="com.atlassian.jira.template.VelocityTemplatingEngine" />
+    <component-import key="searchProvider" interface="com.atlassian.jira.issue.search.SearchProvider" />
+    <component-import key="customFieldManager" interface="com.atlassian.jira.issue.CustomFieldManager" />
+
     <component key="eventListener" class="com.example.tutorial.plugins.VersionListener">
         <description>Class that processes the incoming JIRA issue events.</description>
     </component>

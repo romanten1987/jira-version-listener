@@ -1,0 +1,6 @@
+#foreach ($issueType in $issueTypes) #if($issueType.issues.size() > 0)
+
+    $textUtils.htmlEncode($issueType.name)
+    #foreach ($issue in $issueType.issues)
+    * [{$issue.key}] - $textUtils.htmlEncode($issue.summary) #end
+#end #end
