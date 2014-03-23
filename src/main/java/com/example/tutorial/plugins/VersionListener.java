@@ -4,6 +4,8 @@ import com.atlassian.event.api.EventListener;
 import com.atlassian.event.api.EventPublisher;
 import com.atlassian.jira.config.ConstantsManager;
 import com.atlassian.jira.config.properties.ApplicationProperties;
+import com.atlassian.jira.event.project.AbstractVersionEvent;
+import com.atlassian.jira.event.project.VersionCreateEvent;
 import com.atlassian.jira.event.project.VersionReleaseEvent;
 import com.atlassian.jira.issue.CustomFieldManager;
 import com.atlassian.jira.issue.search.SearchProvider;
@@ -74,10 +76,19 @@ public class VersionListener implements InitializingBean, DisposableBean {
 
     @EventListener
     public void onVersionReleaseEvent(VersionReleaseEvent versionReleaseEvent) {
+        sendNotification(versionReleaseEvent);
+    }
+
+    @EventListener
+    public void onVersionCreateEvent(VersionCreateEvent versionCreateEvent) {
+        sendNotification(versionCreateEvent);
+    }
+
+    private void sendNotification(AbstractVersionEvent versionReleaseEvent) {
         ReportNoteEmail email = new ReportNoteEmail();
         Report report = new Report(this, versionReleaseEvent);
         if (email.isExistGroup("releaseNote-users")) {
-            email.setSubject(report.getReportSubject());
+            email.setSubject("VERSION RELEASED " + report.getReportSubject());
             email.setBody(report.generateReport());
             email.sendToGroup();
         } else {

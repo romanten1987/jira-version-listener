@@ -1,6 +1,8 @@
 package com.example.tutorial.plugins;
 
 import com.atlassian.crowd.embedded.api.User;
+import com.atlassian.jira.event.project.AbstractVersionEvent;
+import com.atlassian.jira.event.project.VersionCreateEvent;
 import com.atlassian.jira.event.project.VersionReleaseEvent;
 import com.atlassian.jira.project.Project;
 import com.atlassian.jira.project.util.ReleaseNoteManager;
@@ -19,15 +21,16 @@ public class Report {
     public static final String RELEASE_NOTE = "ReleaseNote";
     public static final String SUBJECT_TEMPLATE = "%s %s in %s";
     public static final String EMAIL_STYLE = "Email";
-    public static final String TEXT_STYLE = "Text";
+    public static final String DEFAULT_STYLE = "Html";
+    private static final String VERSION_CREATED = "VERSION CREATED";
     private final VersionListener versionListener;
-    private final VersionReleaseEvent versionReleaseEvent;
+    private final AbstractVersionEvent versionEvent;
     private final Version version;
     private final Project project;
 
-    public Report(VersionListener versionListener, VersionReleaseEvent versionReleaseEvent) {
+    public Report(VersionListener versionListener, AbstractVersionEvent versionEvent) {
         this.versionListener = versionListener;
-        this.versionReleaseEvent = versionReleaseEvent;
+        this.versionEvent = versionEvent;
         this.version = getVersion();
         this.project = version.getProjectObject();
     }
@@ -36,11 +39,17 @@ public class Report {
     public String getReportSubject() {
         String versionName = version.getName();
         String projectName = project.getName();
-        return String.format(SUBJECT_TEMPLATE, VERSION_RELEASED, versionName, projectName);
+        String event = "";
+        if (versionEvent instanceof VersionReleaseEvent) {
+            event = VERSION_RELEASED;
+        } else if (versionEvent instanceof VersionCreateEvent) {
+            event = VERSION_CREATED;
+        }
+        return String.format(SUBJECT_TEMPLATE, event, versionName, projectName);
     }
 
     private Version getVersion() {
-        long versionId = versionReleaseEvent.getVersionId();
+        long versionId = versionEvent.getVersionId();
         return versionListener.getVersionManager().getVersion(versionId);
     }
 
@@ -48,7 +57,7 @@ public class Report {
         ReleaseNoteManager releaseNoteManager = new ReleaseNoteManager(versionListener.getApplicationProperties(), versionListener.getEngine(), versionListener.getConstantsManager(), versionListener.getSearchProvider(), versionListener.getCustomFieldManager());
         String style = EMAIL_STYLE;
         if (!releaseNoteManager.getStyles().containsKey(EMAIL_STYLE)) {
-            style = TEXT_STYLE;
+            style = DEFAULT_STYLE;
         }
         Action action = null;
         try {
