@@ -21,6 +21,8 @@ import org.springframework.beans.factory.InitializingBean;
  */
 public class VersionListener implements InitializingBean, DisposableBean {
     private static final Logger log = LoggerFactory.getLogger(VersionListener.class);
+    public static final String GROUP_NAME = "releaseNote-users";
+    public static final String GROUP_NOT_FOUND = "Group \"releaseNote-users\" not found. Please create this group.";
     private final VersionManager versionManager;
     private final EventPublisher eventPublisher;
     private final ConstantsManager constantsManager;
@@ -84,16 +86,18 @@ public class VersionListener implements InitializingBean, DisposableBean {
         sendNotification(versionCreateEvent);
     }
 
-    private void sendNotification(AbstractVersionEvent versionReleaseEvent) {
-        ReportNoteEmail email = new ReportNoteEmail();
-        Report report = new Report(this, versionReleaseEvent);
-        if (email.isExistGroup("releaseNote-users")) {
-            email.setSubject("VERSION RELEASED " + report.getReportSubject());
-            email.setBody(report.generateReport());
-            email.sendToGroup();
-        } else {
-            email.setBody("Group \"releaseNote-users\" not found. Please create this group.");
-            email.sendMessageToAdmin(report.getLeadUser());
+    private void sendNotification(AbstractVersionEvent versionEvent) {
+        Report report = new Report(this, versionEvent);
+        if (report.isVtb()) {
+            ReportNoteEmail email = new ReportNoteEmail();
+            if (email.isExistGroup(GROUP_NAME)) {
+                email.setSubject(report.getReportSubject());
+                email.setBody(report.generateReport());
+                email.sendToGroup();
+            } else {
+                email.setBody(GROUP_NOT_FOUND);
+                email.sendMessageToAdmin(report.getLeadUser());
+            }
         }
     }
 }

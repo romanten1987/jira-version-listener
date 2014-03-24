@@ -23,6 +23,7 @@ public class Report {
     public static final String EMAIL_STYLE = "Email";
     public static final String DEFAULT_STYLE = "Html";
     private static final String VERSION_CREATED = "VERSION CREATED";
+    public static final String PROJECT_NAME = "VTBR-TBR2";
     private final VersionListener versionListener;
     private final AbstractVersionEvent versionEvent;
     private final Version version;
@@ -72,5 +73,9 @@ public class Report {
 
     public User getLeadUser() {
         return project.getProjectLead().getDirectoryUser();
+    }
+
+    public boolean isVtb() {
+        return project.getName().equals(PROJECT_NAME);
     }
 }
