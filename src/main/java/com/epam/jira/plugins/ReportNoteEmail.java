@@ -1,4 +1,4 @@
-package com.example.tutorial.plugins;
+package com.epam.jira.plugins;
 
 import com.atlassian.crowd.embedded.api.Group;
 import com.atlassian.crowd.embedded.api.User;
@@ -87,4 +87,8 @@ public class ReportNoteEmail {
         ComponentAccessor.getMailQueue().addItem(mailQueueItem);
     }
 
+    public void sendTo(String email) {
+        setTo(email);
+        sendMail();
+    }
 }

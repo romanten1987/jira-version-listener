@@ -1,4 +1,4 @@
-package com.example.tutorial.plugins;
+package com.epam.jira.plugins;
 
 import com.atlassian.crowd.embedded.api.User;
 import com.atlassian.jira.component.ComponentAccessor;
@@ -20,15 +20,18 @@ import java.util.Collection;
  */
 public class Report {
     private static final Logger log = LoggerFactory.getLogger(VersionListener.class);
-    public static final String VERSION_RELEASED = "VERSION RELEASED ";
+    public static final String VERSION_RELEASED = "RELEASED ";
     public static final String SUBJECT_TEMPLATE = "%s %s in %s";
-    private static final String VERSION_CREATED = "VERSION CREATED";
+    private static final String VERSION_CREATED = "CREATED";
     public static final String PROJECT_NAME = "VTBR-TBR2";
+    public static final String JIRA_BASEURL = "jira.baseurl";
+    public static final String HTML_VERSION_INFO = "<h2>Version <a href=\"%s/browse/%s/fixforversion/%d\">%s</a> %s</h2>";
     private final VersionListener versionListener;
     private final AbstractVersionEvent versionEvent;
     private final Version version;
     private final Project project;
     private final VersionManager versionManager;
+    private String event;
 
     public Report(VersionListener versionListener, AbstractVersionEvent versionEvent) {
         this.versionListener = versionListener;
@@ -36,19 +39,18 @@ public class Report {
         this.version = getVersion();
         this.project = version.getProjectObject();
         this.versionManager = versionListener.getVersionManager();
+        if (versionEvent instanceof VersionReleaseEvent) {
+            this.event = VERSION_RELEASED;
+        } else if (versionEvent instanceof VersionCreateEvent) {
+            this.event = VERSION_CREATED;
+        }
     }
 
 
     public String getReportSubject() {
         String versionName = version.getName();
         String projectName = project.getName();
-        String event = "";
-        if (versionEvent instanceof VersionReleaseEvent) {
-            event = VERSION_RELEASED;
-        } else if (versionEvent instanceof VersionCreateEvent) {
-            event = VERSION_CREATED;
-        }
-        return String.format(SUBJECT_TEMPLATE, event, versionName, projectName);
+        return String.format(SUBJECT_TEMPLATE, "VERSION " + event, versionName, projectName);
     }
 
     private Version getVersion() {
@@ -58,9 +60,12 @@ public class Report {
 
     public String generateReport() {
         StringBuilder report = new StringBuilder();
-        String jiraURL = ComponentAccessor.getApplicationProperties().getString("jira.baseurl");
+        String jiraURL = ComponentAccessor.getApplicationProperties().getString(JIRA_BASEURL);
         Collection<Issue> issues = versionManager.getIssuesWithFixVersion(version);
-        report.append(String.format("<h1><a href=\"%s/browse/%s/fixforversion/%d\">%s</a></h1><p>%s</p>", jiraURL, project.getKey(), version.getId(), version.getName(), version.getDescription()));
+        report.append(String.format(HTML_VERSION_INFO, jiraURL, project.getKey(), version.getId(), version.getName(), event.toLowerCase()));
+        if (version.getDescription() != null && !version.getDescription().isEmpty()) {
+            report.append("<p>").append(version.getDescription()).append("</p>");
+        }
         for (IssueType issueType : project.getIssueTypes()) {
             StringBuilder text = new StringBuilder();
             for (Issue issue : issues) {

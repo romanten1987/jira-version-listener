@@ -5,17 +5,17 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
-    <groupId>com.example.tutorial.plugins</groupId>
-    <artifactId>new-listener-plugin</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <groupId>com.epam.jira.plugins</groupId>
+    <artifactId>version-listener-plugin</artifactId>
+    <version>1.01</version>
 
     <organization>
-        <name>Example Company</name>
-        <url>http://www.example.com/</url>
+        <name>EPAM</name>
+        <url>http://www.epam.com/</url>
     </organization>
 
-    <name>new-listener-plugin</name>
-    <description>This is the com.example.tutorial.plugins:new-listener-plugin plugin for Atlassian JIRA.</description>
+    <name>EPAM Version Listener Plugin</name>
+    <description>This is the com.epam.jira.plugins:version-listener-plugin plugin for Atlassian JIRA. This plugin send e-mail notification for version release event</description>
     <packaging>atlassian-plugin</packaging>
 
     <dependencies>
@@ -27,22 +27,10 @@
         </dependency>
         <!-- Add dependency on jira-core if you want access to JIRA implementation classes as well as the sanctioned API. -->
         <!-- This is not normally recommended, but may be required eg when migrating a plugin originally developed against JIRA 4.x -->
-        <dependency>
+        <!--<dependency>
             <groupId>com.atlassian.jira</groupId>
             <artifactId>jira-core</artifactId>
             <version>${jira.version}</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>4.10</version>
-            <scope>test</scope>
-        </dependency>
-<!--        <dependency>
-            <groupId>com.atlassian.sal</groupId>
-            <artifactId>sal-api</artifactId>
-            <version>2.0.17</version>
             <scope>provided</scope>
         </dependency>-->
 

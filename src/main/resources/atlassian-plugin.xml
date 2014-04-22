@@ -11,26 +11,17 @@
     <resource type="i18n" name="i18n" location="new-listener-plugin"/>
     
     <!-- add our web resources -->
-    <web-resource key="new-listener-plugin-resources" name="new-listener-plugin Web Resources">
+    <web-resource key="version-listener-plugin-resources" name="version-listener-plugin Web Resources">
         <dependency>com.atlassian.auiplugin:ajs</dependency>
-        
-        <resource type="download" name="new-listener-plugin.css" location="/css/new-listener-plugin.css"/>
-        <resource type="download" name="new-listener-plugin.js" location="/js/new-listener-plugin.js"/>
-        <resource type="download" name="images/" location="/images"/>
-
-        <context>new-listener-plugin</context>
+        <context>version-listener-plugin</context>
     </web-resource>
     
     <!-- import from the product container -->
     <component-import key="applicationProperties" interface="com.atlassian.sal.api.ApplicationProperties" />
 
-    <component-import key="eventPublisher" interface="com.atlassian.event.api.EventPublisher"/>
     <component-import key="versionManager" interface="com.atlassian.jira.project.version.VersionManager" />
-    <component-import key="engine" interface="com.atlassian.jira.template.VelocityTemplatingEngine" />
-    <component-import key="searchProvider" interface="com.atlassian.jira.issue.search.SearchProvider" />
-    <component-import key="customFieldManager" interface="com.atlassian.jira.issue.CustomFieldManager" />
-
-    <component key="eventListener" class="com.example.tutorial.plugins.VersionListener">
+    <component-import key="eventPublisher" interface="com.atlassian.event.api.EventPublisher"/>
+    <component key="eventListener" class="com.epam.jira.plugins.VersionListener">
         <description>Class that processes the incoming JIRA issue events.</description>
     </component>
     
