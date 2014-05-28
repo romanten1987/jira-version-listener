@@ -26,6 +26,7 @@ public class Report {
     public static final String PROJECT_NAME = "VTBR-TBR2";
     public static final String JIRA_BASEURL = "jira.baseurl";
     public static final String HTML_VERSION_INFO = "<h2>Version <a href=\"%s/browse/%s/fixforversion/%d\">%s</a> %s</h2>";
+    public static final String BY_NAME = "By <a href=\"%s/secure/ViewProfile.jspa?name=%s\">%s</a>";
     private final VersionListener versionListener;
     private final AbstractVersionEvent versionEvent;
     private final Version version;
@@ -61,8 +62,12 @@ public class Report {
     public String generateReport() {
         StringBuilder report = new StringBuilder();
         String jiraURL = ComponentAccessor.getApplicationProperties().getString(JIRA_BASEURL);
+        User user = ComponentAccessor.getJiraAuthenticationContext().getUser().getDirectoryUser();
         Collection<Issue> issues = versionManager.getIssuesWithFixVersion(version);
         report.append(String.format(HTML_VERSION_INFO, jiraURL, project.getKey(), version.getId(), version.getName(), event.toLowerCase()));
+        if (user != null) {
+            report.append(String.format(BY_NAME, jiraURL, user.getName(), user.getDisplayName()));
+        }
         if (version.getDescription() != null && !version.getDescription().isEmpty()) {
             report.append("<p>").append(version.getDescription()).append("</p>");
         }

@@ -63,15 +63,9 @@ public class VersionListener implements InitializingBean, DisposableBean {
         Report report = new Report(this, versionEvent);
         if (report.isVtb()) {
             ReportNoteEmail email = new ReportNoteEmail();
-            if (email.isExistGroup(GROUP_NAME)) {
-                email.setSubject(report.getReportSubject());
-                email.setBody(report.generateReport());
-                //email.sendToGroup();
-                email.sendTo(EMAIL);
-            } else {
-                email.setBody(GROUP_NOT_FOUND);
-                email.sendMessageToAdmin(report.getLeadUser());
-            }
+            email.setSubject(report.getReportSubject());
+            email.setBody(report.generateReport());
+            email.sendTo(EMAIL);
         }
     }
 }

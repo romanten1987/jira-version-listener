@@ -7,7 +7,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.epam.jira.plugins</groupId>
     <artifactId>version-listener-plugin</artifactId>
-    <version>1.01</version>
+    <version>1.02</version>
 
     <organization>
         <name>EPAM</name>
